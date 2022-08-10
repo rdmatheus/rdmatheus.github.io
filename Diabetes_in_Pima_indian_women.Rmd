@@ -1,0 +1,146 @@
+---
+title: "Análise de dados"
+author: "Rodrigo e Herminio"
+date: "16/07/2022"
+output:
+  html_document:
+    toc: yes
+subtitle: Diabetes em mulheres na tribo indígena Pima
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      warning = FALSE,
+                      message = FALSE,
+                      fig.width = 8,
+                      fig.asp = 0.818,
+                      out.width = "80%",
+                      fig.align = "center") ## configurações globais
+```
+
+Pacotes utilizados
+
+```{r}
+library(tidyverse)
+library(skimr)
+```
+
+
+Os dados analisados neste relatório consistem no conjunto de treinamento `Pima.tr` disponível no pacote `MASS`. Mais especificamente, as observações são o teste para diabetes, e outras variáveis, de 200 mulheres de ao menos 21 anos pertencentes à tribo indígena Pima, situada perto da cidade de Phoenix, Arizona. Os dados foram coletados pela US National Institute of Diabetes and Digestive and Kidney Diseases. O objetivo principal do estudo foi relacionar a diabetes com variáveis de saúde individual. Abaixo carregamos os dados. 
+
+```{r}
+## Carregando os dados
+data("Pima.tr", package = "MASS")
+```
+
+A variável dependente (`type`) é o resultado do teste para diabetes, de acordo com os critérios da Organização Mundial da Saúde. Os dados apresentam 34% de testes positivos. As variáveis explicativas são listadas a seguir.
+
+- `npreg`: número de gestações;
+- `glu` concentração plasmática de glicose em um teste oral de tolerância à glicose;
+- `bp`: pressão arterial diastólica (mm Hg);
+- `skin`: espessura da prega cutânea do tríceps (mm);
+- `bmi`: índice de massa corporal (peso em kg/(altura em m)$^2$);
+- `ped`: função hereditária do diabetes;
+- `age`: idade, em anos.
+
+Algumas estatísticas descritivas do conjunto de dados pode ser observado a seguir.
+
+```{r}
+skim(Pima.tr)
+```
+
+As figuras abaixo apresentam a distribuição do número de gestações de acordo com o resultado do teste para diabetes. Os boxplots's nos mostram que o número mediano de gestações para mulheres com diabetes é maior do que o de mulheres sem diabetes, além de sua variabilidade. Apesar disso, vemos quatro mulheres, julgadas como discrepantes pelo boxplot, com mais de oito gestações e que tiveram teste negativo. O gráfico de barras complementa as conclusões dando mais detalhes acerca das duas distribuições. Percebemos a concentração de casos negativos para mulheres com poucas gestações (entre 0 e 4 gestações). Além disso, a distribuição do número de gestações para mulheres com diabetes parece ser uma mistura de distribuições, indicando que o teste positivo depende de outros fatores. 
+
+```{r, fig.show='hold', out.width="50%", fig.align='default'}
+boxplot(npreg ~ type, data = Pima.tr, xlab = "Resultado do teste",
+        ylab = "Número de gestações", names = c("Negativo", "Positivo"), pch = 16)
+
+barplot(table(Pima.tr$type, Pima.tr$npreg), legend = TRUE,
+        xlab = "Número de gestações", ylab = "Frequência", beside = TRUE,
+        legend.text = c("Negativo", "Positivo"))
+```
+
+Abaixo calculamos algumas estatísticas descritivas do número de gestações de acordo com o resultado do teste.
+
+```{r}
+Pima.tr %>% group_by(type) %>% summarise(Min = min(npreg),
+                                         Q1 = quantile(npreg, prob = 0.25),
+                                         Mean = mean(npreg),
+                                         Median = median(npreg),
+                                         Q3 = quantile(npreg, prob = 0.75),
+                                         Max = max(npreg),
+                                         Sd = sd(npreg))
+
+# Ou
+# Pima.tr %>% group_by(type) %>% skim(npreg)
+```
+
+
+Os boxplot's abaixo aprensentam a distribuição da concentração plasmática de glicose de acordo com os níveis da variável resposta. Observamos que a concentração mediana para índias que testaram positivo para diabetes é maior do que para aquelas que testaram negativo. Mais uma vez temos quatro observações discrepantes de acordo com o boxplot.
+
+
+```{r}
+boxplot(glu ~ type, Pima.tr, xlab = "Resultado do teste",
+        ylab = "Concentração plasmática de glicose",
+        names = c("Negativo", "Positivo"), pch = 16)
+```
+
+```{r eval=FALSE, include=FALSE}
+
+# Alternativa
+
+# library(ggplot2)
+# library(ggridges)
+# 
+# ggplot(Pima.tr, aes(x = glu, y = type, fill = type)) +
+#   theme_classic() +
+#   geom_density_ridges() +
+#   scale_fill_discrete("Resultado do teste") +
+#   labs(x = "Concentração plasmática de glicose", y = "Resultado do teste")
+
+```
+
+
+Abaixo calculamos estatísticas descritivas para a concentração de glicose de acordo com o resultado do teste.
+
+```{r}
+Pima.tr %>% group_by(type) %>% summarise(Min = min(glu),
+                                         Q1 = quantile(glu, prob = 0.25),
+                                         Mean = mean(glu),
+                                         Mediana = median(glu),
+                                         Q3 = quantile(glu, prob = 0.75),
+                                         Max = max(glu),
+                                         Sd = sd(glu))
+```
+
+A figura abaixo apresenta os bloxplot's da pressão arterial diastólica de acordo com o resultado do teste. Percebemos que mulheres com diabetes apresenteram uma pressão mediana um pouco maior do que as que não possuem diabetes. As distrbiuições diferem tanto quanto as outras distribuições analisadas previamente. 
+
+```{r}
+boxplot(bp ~ type, Pima.tr, xlab = "Resultado do teste",
+        ylab = "Pressão arterial", names = c("Negativo", "Positivo"), pch = 16)
+```
+Abaixo apresentamos algumas estatísticas descritivas da pressão arterial diastólica de acordo com o resultado do teste. 
+
+```{r}
+Pima.tr %>% group_by(type) %>% summarise(Min = min(bp),
+                                         Q1 = quantile(bp, prob = 0.25),
+                                         Mean = mean(bp),
+                                         Mediana = median(bp),
+                                         Q3 = quantile(bp, prob = 0.75),
+                                         Max = max(bp),
+                                         Sd = sd(bp))
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
